@@ -1,0 +1,201 @@
+"""
+Problem 1: Greatest Node
+Write a function find_max() that takes in the head of a linked list and returns the maximum value in the linked list. You can assume the linked list will contain only numeric values.
+
+Evaluate the time and space complexity of your solution. Define your variables and provide a rationale for why you believe your solution has the stated time and space complexity.
+
+Understanding:
+input: head
+out: integer - max number
+
+edge cases: empty linked list -> return -1
+
+Planning:
+Traverse linked list, keep track of the max
+"""
+
+class Node:
+    def __init__(self, value, next=None):
+        self.value = value
+        self.next = next
+
+# For testing
+def print_linked_list(head):
+    current = head
+    while current:
+        print(current.value, end=" -> " if current.next else "\n")
+        current = current.next
+
+def find_max(head):
+    res = float("-inf")
+    curr = head
+    while curr:
+        res = max(res, curr.value)
+        curr = curr.next
+    return res
+
+"""
+Runtime: O(n)
+Space: O(1)
+"""
+head1 = Node(5, Node(6, Node(7, Node(8))))
+
+# Linked List: 5 -> 6 -> 7 -> 8
+print(find_max(head1))
+
+head2 = Node(5, Node(8, Node(6, Node(7))))
+
+# Linked List: 5 -> 8 -> 6 -> 7
+print(find_max(head2))
+
+"""
+Problem 2: Remove Tail
+The following code incorrectly implements the function remove_tail(). When correctly implemented, remove_tail() accepts the head of a singly linked list and removes the last node (the tail) in the list. The function should return the head of the modified list.
+
+Step 1: Copy this code into Replit.
+
+Step 2: Create your own test cases to run the code against. Use print statements, print_linked_list(), and the stack trace to identify and fix any bugs so that the function correctly removes the last node from the list.
+"""
+
+class Node:
+    def __init__(self, value=None, next=None):
+        self.value = value
+        self.next = next
+        
+# For testing
+def print_linked_list(head):
+    current = head
+    while current:
+        print(current.value, end=" -> " if current.next else "\n")
+        current = current.next
+
+def remove_tail(head):
+    if head is None:
+        return None
+    if head.next is None:
+        return None 
+
+    # prev = None    
+    current = head
+    while current.next.next: 
+        # prev = current
+        current = current.next
+    
+    # prev.next = None
+    current.next = None     
+    return head
+
+head = Node("Isabelle", Node("Alfonso", Node("Cyd")))
+
+# Linked List: Isabelle -> Alfonso -> Cyd
+print_linked_list(remove_tail(head))
+
+"""
+Understanding:
+input: head of linked list
+out: head of linked list
+
+edge cases: empty linked list -> return None
+            no duplicates -> return the same list
+            all duplicates -> return None
+
+Planning:
+make a dict of elements with their frequencies as we traverse the linked list
+if element has more than 1 occurence, 
+    if head is repeated, then delete head and make a linked list
+    else, delete the node
+dummy = Node(-1, head)
+dummy.next = head.next
+return dummy.next
+return modified list
+"""
+
+def delete_dupes(head):
+    temp = Node(-1, head)
+    element_freq = dict()
+
+    curr = head
+    while curr:
+        if curr.value in element_freq:
+            element_freq[curr.value] += 1
+        else:
+            element_freq[curr.value] = 1
+        curr = curr.next
+    
+    curr = head
+    prev = temp
+
+    while curr:
+        if element_freq[curr.value] > 1:
+            prev.next = curr.next
+        else:
+            prev = curr
+        curr = curr.next
+
+    return temp.next
+    
+head = Node(1, Node(2, Node(3, Node(3, Node(4, Node(5))))))
+head = Node(1, Node(1, Node(3, Node(3, Node(4, Node(5))))))
+
+# Linked List: 1 -> 2 -> 3 -> 3 -> 4 -> 5
+print_linked_list(delete_dupes(head))
+
+"""
+Understanding:
+A variation of the two-pointer technique introduced earlier in the course is to have a slow and a fast pointer that increment at different rates. Given the head of a linked list, use the slow-fast pointer technique to write a function has_cycle() that returns True if the list has a cycle in it and False otherwise. A linked list has a cycle if at some point in the list, the node’s next pointer points back to a previous node in the list.
+
+Evaluate the time and space complexity of your solution. Define your variables and provide a rationale for why you believe your solution has the stated time and space complexity.
+
+Understand:
+    input: is a linked list head
+    output: bool, where true if there is a cycle, false otherwise
+        a cycle is defined as when a Node's next is a previous Node in the Link list
+
+    constraint: use slow-fast technique
+
+Plan: 
+    Traverse the LL
+    For each node:
+        traverse the remaining portion of the LL
+        Check if the slow Node is the same as the fast Node
+            If so, return True
+    
+    return False
+
+    slow - move 1 node slow = slow.next
+    fast - move 2 nodes fast = fast.next.next
+
+    cycle => fast catch up with slow -> fast = slow
+    no cycle => fast reach a None node
+"""
+
+
+def has_cycle(head):
+    slow = head
+    fast = head
+
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+
+        if slow == fast:
+            return True
+
+    return False
+
+peach = Node("Peach", Node("Luigi", Node("Mario", Node("Toad"))))
+
+# Toad.next = Luigi
+peach.next.next.next = peach.next
+
+print(has_cycle(peach))
+
+'''
+have a stack
+traverse list
+    add a copy of each node to the stack
+pop the stack n times till you reach the n-th element from the end
+store the nth element
+traverse the list again
+    if the current node matches the stored element, remove this Node
+return modified'''
